@@ -2,12 +2,17 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import {
   Activity, DollarSign, Cpu, CheckCircle, XCircle, Monitor, Zap, ZapOff, WifiOff,
-  Search, ArrowUpDown, ChevronUp, ChevronDown, Loader2, Check, AlertCircle, AlertTriangle, RefreshCw
+  Search, ArrowUpDown, ChevronUp, ChevronDown, Loader2, Check, AlertCircle, AlertTriangle, RefreshCw, CalendarClock
 } from 'lucide-react';
 
 const API_BASE = 'https://my-machines-api.onrender.com';
 
 const statusPriority = { 'Online & Active': 0, 'No Internet (Running)': 1, 'Power Off': 2, 'Unknown': 3 };
+
+function parseDate(dateStr) {
+  if (!dateStr) return null;
+  return new Date(dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`);
+}
 
 function getMachineStatus(machine) {
   if (machine.powerStatus === 'POWER_OFF' || !machine.lastSeen) {
@@ -19,7 +24,7 @@ function getMachineStatus(machine) {
     };
   }
 
-  const lastSeenDate = new Date(machine.lastSeen);
+  const lastSeenDate = parseDate(machine.lastSeen);
   const now = new Date();
   const diffInSeconds = (now - lastSeenDate) / 1000;
 
@@ -199,8 +204,8 @@ export default function App() {
           valB = Number(b.totalCollected || 0);
           break;
         case 'lastSync':
-          valA = a.lastSeen ? new Date(a.lastSeen).getTime() : 0;
-          valB = b.lastSeen ? new Date(b.lastSeen).getTime() : 0;
+          valA = a.lastSeen ? parseDate(a.lastSeen).getTime() : 0;
+          valB = b.lastSeen ? parseDate(b.lastSeen).getTime() : 0;
           break;
         default:
           return 0;
@@ -262,7 +267,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-blue-500/30 pb-12">
-      {/* Sticky Header with Glassmorphism */}
       <header className="sticky top-0 z-20 backdrop-blur-xl bg-slate-950/80 border-b border-slate-800/80 px-6 py-4 md:px-8 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400 bg-clip-text text-transparent">
@@ -288,7 +292,6 @@ export default function App() {
       </header>
 
       <main className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
-        {/* Stats Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {[
             { title: 'Total Machines', value: currentStats.totalMachines, sub: `${currentStats.activeMachines} Powered On`, subColor: 'text-emerald-400', icon: <Cpu size={24} />, color: 'blue' },
@@ -320,7 +323,6 @@ export default function App() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* Network Status Table */}
           <div className="lg:col-span-2 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl overflow-hidden flex flex-col">
             <div className="p-5 border-b border-slate-800 bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h2 className="text-lg font-bold flex items-center gap-2 text-slate-100">
@@ -354,7 +356,7 @@ export default function App() {
                         </div>
                       </th>
                     ))}
-                    <th className="p-4">Last Session</th>
+                    <th className="p-4">Session Info</th>
                     <th className="p-4 cursor-pointer hover:bg-slate-800/50 transition-colors group select-none" onClick={() => handleSort('lastSync')}>
                       <div className="flex items-center gap-2">Last Sync <SortIcon column="lastSync" /></div>
                     </th>
@@ -373,6 +375,8 @@ export default function App() {
                   ) : (
                     filteredAndSortedMachines.map((machine) => {
                       const status = getMachineStatus(machine);
+                      const parsedDate = parseDate(machine.lastSeen);
+                      
                       return (
                         <tr key={machine.machineId} className="text-sm hover:bg-slate-800/40 transition-colors group">
                           <td className="p-4 border-l-2 border-transparent group-hover:border-blue-500 transition-colors">
@@ -386,9 +390,23 @@ export default function App() {
                           <td className="p-4 font-bold text-emerald-400">
                             {Number(machine.totalCollected || 0).toFixed(2)} <span className="text-xs text-emerald-500/50 font-normal">JOD</span>
                           </td>
-                          <td className="p-4 text-slate-400 text-xs font-medium">{machine.lastSessionInfo || 'N/A'}</td>
-                          <td className="p-4 text-slate-500 text-xs">
-                            {machine.lastSeen ? new Date(machine.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Never'}
+                          <td className="p-4 text-slate-400 text-xs font-medium max-w-[150px] truncate" title={machine.lastSessionInfo}>
+                            {machine.lastSessionInfo || 'N/A'}
+                          </td>
+                          <td className="p-4">
+                            {parsedDate ? (
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-slate-300 font-medium text-[13px] flex items-center gap-1.5">
+                                  <CalendarClock size={12} className="text-slate-500" />
+                                  {parsedDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                </span>
+                                <span className="text-slate-500 text-[11px] pl-4">
+                                  {parsedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-500 text-xs">Never</span>
+                            )}
                           </td>
                         </tr>
                       );
@@ -399,7 +417,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Chart Section */}
           <div className="rounded-2xl bg-slate-900 p-6 border border-slate-800 shadow-xl flex flex-col hover:border-slate-700 transition-colors">
             <div className="mb-6">
               <h2 className="text-lg font-bold flex items-center gap-2 text-slate-100">
