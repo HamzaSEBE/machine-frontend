@@ -138,7 +138,6 @@ function MachineRow({ machine, onSaveName }) {
 
               {(machine.powerOnTime || machine.powerOffTime) ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Power ON Card */}
                   <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-5 flex items-start gap-4 shadow-lg hover:border-emerald-500/30 transition-colors">
                     <div className="p-3 bg-emerald-500/10 rounded-full shrink-0">
                       <Power className="text-emerald-400" size={24} />
@@ -152,7 +151,6 @@ function MachineRow({ machine, onSaveName }) {
                     </div>
                   </div>
 
-                  {/* Power OFF Card */}
                   <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-5 flex items-start gap-4 shadow-lg hover:border-rose-500/30 transition-colors">
                     <div className="p-3 bg-rose-500/10 rounded-full shrink-0">
                       <Power className="text-rose-400" size={24} />
@@ -265,6 +263,27 @@ export default function App() {
           </div>
           <span className="bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent animate-pulse tracking-widest text-sm uppercase">Initializing Core Systems</span>
         </div>
+      </div>
+    );
+  }
+
+  // 👈 تم إرجاع شاشة الفحص هنا لمنع الدخول بدون داتا والتحويل لصفحة الباك إند تلقائياً
+  if (!stats && fetchError) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-[#0B0F19] text-white gap-5 px-6 text-center">
+        <div className="p-4 bg-rose-500/10 rounded-full">
+          <AlertTriangle size={48} className="text-rose-400 animate-pulse" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-100">تعذّر الوصول للسيرفر أو تحتاج لتسجيل الدخول</h2>
+        <p className="text-slate-400 max-w-sm text-sm leading-relaxed">
+          تأكد من تشغيل السيرفر ومن تسجيل الدخول. سيتم تحويلك لصفحة الدخول إذا لم تكن مسجلاً.
+        </p>
+        <button
+          onClick={() => window.location.href = `${API_BASE}/login`}
+          className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+        >
+          <RefreshCw size={16} /> تسجيل الدخول / إعادة المحاولة
+        </button>
       </div>
     );
   }
