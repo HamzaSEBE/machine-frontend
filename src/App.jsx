@@ -5,7 +5,7 @@ import {
   Search, ArrowUpDown, ChevronUp, ChevronDown, Loader2, Check, AlertCircle, AlertTriangle, RefreshCw
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = 'https://my-machines-api.onrender.com';
 
 const statusPriority = { 'Online & Active': 0, 'No Internet (Running)': 1, 'Power Off': 2, 'Unknown': 3 };
 
