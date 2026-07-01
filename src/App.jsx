@@ -108,7 +108,7 @@ function MachineRow({ machine, onSaveName, onResetCashCounter, onResetCoinCounte
         <td className="p-5 align-middle border-y border-transparent group-hover:border-white/5">
           <div className="flex flex-col">
             <span className="text-lg font-bold text-indigo-400">{Number(machine.offlineCoins || 0)}</span>
-            <span className="text-[10px] uppercase tracking-widest text-white/40 font-semibold mt-0.5">Offline Sync</span>
+            <span className="text-[10px] uppercase tracking-widest text-white/40 font-semibold mt-0.5">Offline Coin</span>
           </div>
         </td>
 
